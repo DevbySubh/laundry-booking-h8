@@ -3,201 +3,209 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Laundry Slot Booking</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>Laundry Booking</title>
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to right, #f2f2f2, #d9e4f5);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding-top: 50px;
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      padding: 20px;
     }
-
-    .container {
-      background: #fff;
-      padding: 30px 40px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      width: 500px;
-      max-width: 95%;
+    h1 {
       text-align: center;
     }
-
-    h1 {
-      color: #333;
-      margin-bottom: 25px;
+    form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
     label {
       display: block;
-      text-align: left;
       margin-top: 15px;
-      font-weight: 500;
     }
-
-    input, select, button {
+    select, input[type="text"], input[type="date"] {
       width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
+      padding: 8px;
+      margin-top: 5px;
     }
-
     button {
-      background-color: #007BFF;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #3498db;
       color: white;
-      font-weight: bold;
-      margin-top: 20px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background 0.3s ease;
     }
-
     button:hover {
-      background-color: #0056b3;
-    }
-
-    #message {
-      margin-top: 20px;
-      font-weight: bold;
-      color: green;
-    }
-
-    #bookedSlots {
-      margin-top: 20px;
-      text-align: left;
-      font-size: 15px;
-    }
-
-    #bookedSlots ul {
-      padding-left: 20px;
-    }
-
-    .btn-secondary {
-      background-color: #6c757d;
-    }
-
-    .btn-secondary:hover {
-      background-color: #5a6268;
+      background-color: #2980b9;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🧺 Laundry Slot Booking</h1>
-    <form id="bookingForm">
-      <label for="name">Your Name</label>
+  <h1>Laundry Slot Booking</h1>
+  <form id="bookingForm">
+    <label>Name:
       <input type="text" id="name" required />
+    </label>
+    <label>Date:
+      <input type="date" id="dateInput" required />
+    </label>
 
-      <label for="bigWasher">Big Washing Machine</label>
-      <select id="bigWasher"></select>
+    <label>Big Washer:
+      <select id="bigWasher">
+        <option value="">--Select Time Slot--</option>
+      </select>
+    </label>
 
-      <label for="smallWasher">Small Washing Machine</label>
-      <select id="smallWasher"></select>
+    <label>Small Washer:
+      <select id="smallWasher">
+        <option value="">--Select Time Slot--</option>
+      </select>
+    </label>
 
-      <label for="bigDryer">Big Dryer</label>
-      <select id="bigDryer"></select>
+    <label>Big Dryer:
+      <select id="bigDryer">
+        <option value="">--Select Time Slot--</option>
+      </select>
+    </label>
 
-      <label for="smallDryer">Small Dryer</label>
-      <select id="smallDryer"></select>
+    <label>Small Dryer:
+      <select id="smallDryer">
+        <option value="">--Select Time Slot--</option>
+      </select>
+    </label>
 
-      <button type="submit">Book Slot(s)</button>
-    </form>
+    <button type="submit">Book Slot</button>
+    <button type="button" id="viewBookingsBtn">View All Bookings</button>
+  </form>
 
-    <button id="viewBookingsBtn" class="btn-secondary">View Booked Slots</button>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
-    <div id="message"></div>
-    <div id="bookedSlots"></div>
-  </div>
-
-  <script>
-    const bookings = [];
-
-    const machines = [
-      { id: "bigWasher", label: "Big Washing Machine" },
-      { id: "smallWasher", label: "Small Washing Machine" },
-      { id: "bigDryer", label: "Big Dryer" },
-      { id: "smallDryer", label: "Small Dryer" }
-    ];
-
-    const generateTimeSlots = () => {
-      const slots = [];
-      for (let hour = 8; hour < 20; hour++) {
-        const start = hour.toString().padStart(2, '0') + ":00";
-        const end = (hour + 1).toString().padStart(2, '0') + ":00";
-        slots.push(`${start} - ${end}`);
-      }
-      return slots;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfU-aqLYHF_X0Rwv0WqZtZB_M0cdacoDg",
+      authDomain: "launry-booking-h8.firebaseapp.com",
+      databaseURL: "https://launry-booking-h8-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "launry-booking-h8",
+      storageBucket: "launry-booking-h8.appspot.com",
+      messagingSenderId: "485927717258",
+      appId: "1:485927717258:web:be15abc9f8cd281846e073"
     };
 
-    // Populate dropdowns
-    window.onload = () => {
-      const timeSlots = generateTimeSlots();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      machines.forEach(({ id }) => {
-        const select = document.getElementById(id);
-        select.innerHTML = `<option value="">-- Select Time Slot --</option>`;
-        timeSlots.forEach(slot => {
+    const nameInput = document.getElementById("name");
+    const dateInput = document.getElementById("dateInput");
+    const bigWasher = document.getElementById("bigWasher");
+    const smallWasher = document.getElementById("smallWasher");
+    const bigDryer = document.getElementById("bigDryer");
+    const smallDryer = document.getElementById("smallDryer");
+    const form = document.getElementById("bookingForm");
+
+    const slots = Array.from({length: 24}, (_, i) => {
+      const hour = i % 12 === 0 ? 12 : i % 12;
+      const period = i < 12 ? "AM" : "PM";
+      return `${hour}:00 ${period}`;
+    });
+
+    const populateDropdown = (dropdown, booked = []) => {
+      dropdown.innerHTML = '<option value="">--Select Time Slot--</option>';
+      slots.forEach(slot => {
+        if (!booked.includes(slot)) {
           const option = document.createElement("option");
           option.value = slot;
-          option.textContent = slot;
-          select.appendChild(option);
+          option.text = slot;
+          dropdown.appendChild(option);
+        }
+      });
+    };
+
+    const populateAllDropdowns = (bookedSlots = {}) => {
+      populateDropdown(bigWasher, bookedSlots.bigWasher || []);
+      populateDropdown(smallWasher, bookedSlots.smallWasher || []);
+      populateDropdown(bigDryer, bookedSlots.bigDryer || []);
+      populateDropdown(smallDryer, bookedSlots.smallDryer || []);
+    };
+
+    const loadBookedSlots = () => {
+      const selectedDate = dateInput.value;
+      const booked = { bigWasher: [], smallWasher: [], bigDryer: [], smallDryer: [] };
+
+      onValue(ref(db, "bookings"), (snapshot) => {
+        const bookings = snapshot.val() || {};
+        Object.values(bookings).forEach(entry => {
+          if (entry.date === selectedDate) {
+            if (entry.bigWasher) booked.bigWasher.push(entry.bigWasher);
+            if (entry.smallWasher) booked.smallWasher.push(entry.smallWasher);
+            if (entry.bigDryer) booked.bigDryer.push(entry.bigDryer);
+            if (entry.smallDryer) booked.smallDryer.push(entry.smallDryer);
+          }
+        });
+        populateAllDropdowns(booked);
+      });
+    };
+
+    // Limit selectable dates to today and tomorrow
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const formatDate = (d) => d.toISOString().split('T')[0];
+    dateInput.min = formatDate(today);
+    dateInput.max = formatDate(tomorrow);
+    dateInput.value = formatDate(today);
+    loadBookedSlots();
+
+    dateInput.addEventListener("change", loadBookedSlots);
+
+    // Only allow one washer and one dryer selection
+    const enforceOneWasherDryer = () => {
+      const washers = [bigWasher, smallWasher];
+      const dryers = [bigDryer, smallDryer];
+
+      washers.forEach((dropdown, idx) => {
+        dropdown.addEventListener("change", () => {
+          if (dropdown.value) {
+            washers[(idx + 1) % 2].value = "";
+          }
+        });
+      });
+
+      dryers.forEach((dropdown, idx) => {
+        dropdown.addEventListener("change", () => {
+          if (dropdown.value) {
+            dryers[(idx + 1) % 2].value = "";
+          }
         });
       });
     };
+    enforceOneWasherDryer();
 
-    const form = document.getElementById("bookingForm");
-    const message = document.getElementById("message");
-    const viewBookingsBtn = document.getElementById("viewBookingsBtn");
-    const bookedSlotsDiv = document.getElementById("bookedSlots");
-
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      if (!name) return;
-
-      let anyBooked = false;
-      machines.forEach(({ id, label }) => {
-        const select = document.getElementById(id);
-        const slot = select.value;
-        if (slot) {
-          bookings.push({ name, machine: label, slot });
-          select.querySelector(`option[value="${slot}"]`).remove(); // remove booked slot
-          anyBooked = true;
-        }
+      const data = {
+        name: nameInput.value,
+        date: dateInput.value,
+        bigWasher: bigWasher.value || null,
+        smallWasher: smallWasher.value || null,
+        bigDryer: bigDryer.value || null,
+        smallDryer: smallDryer.value || null
+      };
+      push(ref(db, "bookings"), data).then(() => {
+        alert("Booking successful!");
+        form.reset();
+        dateInput.value = formatDate(today);
+        loadBookedSlots();
       });
-
-      if (anyBooked) {
-        message.style.color = 'green';
-        message.textContent = `🎉 Slot(s) booked successfully for ${name}!`;
-      } else {
-        message.style.color = 'red';
-        message.textContent = "⚠️ Please select at least one time slot.";
-      }
-
-      document.getElementById("name").value = "";
     });
 
-    viewBookingsBtn.addEventListener("click", () => {
-      if (bookings.length === 0) {
-        bookedSlotsDiv.innerHTML = "<p>No slots booked yet.</p>";
-        return;
-      }
-
-      let list = "<ul>";
-      bookings.forEach(b => {
-        list += `<li><strong>${b.name}</strong> booked <em>${b.machine}</em> at <u>${b.slot}</u></li>`;
-      });
-      list += "</ul>";
-
-      bookedSlotsDiv.innerHTML = `
-        <h3>📋 Booked Slots</h3>
-        ${list}
-      `;
+    document.getElementById("viewBookingsBtn").addEventListener("click", () => {
+      window.location.href = "bookings.html";
     });
   </script>
 </body>
