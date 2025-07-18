@@ -225,6 +225,7 @@ Small Dryer: ${entry.smallDryer || "-"}`;
     });
 
     document.getElementById("showBookingsBtn").addEventListener("click", () => {
+      bookingDate.value = today;  // ✅ ensures correct date is selected
       document.getElementById("bookingSection").style.display = "block";
       loadBookings();
     });
