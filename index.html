@@ -121,11 +121,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ✅ Changed to use browser local time
+    // ✅ FIXED: Uses local time formatted as YYYY-MM-DD
     const getLocalDate = (offset = 0) => {
       const now = new Date();
       now.setDate(now.getDate() + offset);
-      return now.toISOString().split("T")[0];
+      return now.toLocaleDateString('en-CA'); // format: YYYY-MM-DD
     };
 
     const today = getLocalDate(0);
