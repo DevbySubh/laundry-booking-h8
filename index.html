@@ -109,22 +109,21 @@
     import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
     const firebaseConfig = {
-     apiKey: "AIzaSyBfU-aqLYHF_X0Rwv0WqZtZB_M0cdacoDg",
-     authDomain: "launry-booking-h8.firebaseapp.com",
-     databaseURL: "https://launry-booking-h8-default-rtdb.asia-southeast1.firebasedatabase.app",
+      apiKey: "AIzaSyBfU-aqLYHF_X0Rwv0WqZtZB_M0cdacoDg",
+      authDomain: "launry-booking-h8.firebaseapp.com",
+      databaseURL: "https://launry-booking-h8-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "launry-booking-h8",
-     storageBucket: "launry-booking-h8.appspot.com",
+      storageBucket: "launry-booking-h8.appspot.com",
       messagingSenderId: "485927717258",
       appId: "1:485927717258:web:be15abc9f8cd281846e073"
-   };
-
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // ✅ Changed to use browser local time
     const getLocalDate = (offset = 0) => {
       const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset() + 330); // IST
       now.setDate(now.getDate() + offset);
       return now.toISOString().split("T")[0];
     };
@@ -226,7 +225,7 @@ Small Dryer: ${entry.smallDryer || "-"}`;
     });
 
     document.getElementById("showBookingsBtn").addEventListener("click", () => {
-      bookingDate.value = today;  // ✅ ensures correct date is selected
+      bookingDate.value = today;
       document.getElementById("bookingSection").style.display = "block";
       loadBookings();
     });
