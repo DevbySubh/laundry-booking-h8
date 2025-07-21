@@ -121,11 +121,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ✅ FIXED: Uses local time formatted as YYYY-MM-DD
     const getLocalDate = (offset = 0) => {
       const now = new Date();
       now.setDate(now.getDate() + offset);
-      return now.toLocaleDateString('en-CA'); // format: YYYY-MM-DD
+      return now.toLocaleDateString('en-CA');
     };
 
     const today = getLocalDate(0);
@@ -213,6 +212,14 @@ Small Dryer: ${entry.smallDryer || "-"}`;
       }
       if (dryerCount > 1) {
         alert("Please select only one Dryer slot (Big or Small).");
+        return;
+      }
+      if (washerCount === 0) {
+        alert("Please select a time slot for at least one Washing Machine.");
+        return;
+      }
+      if (dryerCount === 0) {
+        alert("Please select a time slot for at least one Dryer.");
         return;
       }
 
