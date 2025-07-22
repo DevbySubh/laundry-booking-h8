@@ -109,7 +109,7 @@
     import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyBfU-aqLYHF_X0Rwv0WqZtZB_M0cdacoDg",
+      apiKey: "AIzaSyBfU-aqLYHF_X0Rwv0WqZtB_M0cdacoDg",
       authDomain: "launry-booking-h8.firebaseapp.com",
       databaseURL: "https://launry-booking-h8-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "launry-booking-h8",
@@ -136,10 +136,11 @@
     bookingDate.value = today;
 
     const timeSlots = [];
-    for (let minutes = 0; minutes < 24 * 60; minutes += 90) {
+    // changed interval to 60 minutes:
+    for (let minutes = 0; minutes < 24 * 60; minutes += 60) {
       const startHour = Math.floor(minutes / 60);
       const startMin = minutes % 60;
-      const endMinutes = (minutes + 90) % (24 * 60);
+      const endMinutes = (minutes + 60) % (24 * 60);
       const endHour = Math.floor(endMinutes / 60);
       const endMin = endMinutes % 60;
 
