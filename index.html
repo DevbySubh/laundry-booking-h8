@@ -4,68 +4,107 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laundry Slot Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f3f3f3;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f0f4ff, #e1ecff);
       margin: 0;
       padding: 0;
     }
+
     .container {
       max-width: 700px;
-      margin: 30px auto;
+      margin: 40px auto;
       background: #fff;
-      padding: 20px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
-    h2 {
+
+    h2, h3 {
       text-align: center;
-      color: #333;
+      color: #2c3e50;
+      margin-bottom: 20px;
     }
+
     label {
       display: block;
-      margin-top: 15px;
-      color: #444;
+      margin-top: 20px;
+      color: #2c3e50;
+      font-weight: 600;
     }
+
     input, select, button {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 1rem;
+      font-family: 'Poppins', sans-serif;
+      transition: 0.3s;
     }
+
+    input:focus, select:focus {
+      border-color: #007BFF;
+      outline: none;
+    }
+
     button {
       background-color: #007BFF;
       color: white;
+      font-weight: 600;
       border: none;
-      cursor: pointer;
+      margin-top: 30px;
+      transition: background-color 0.3s ease;
     }
+
     button:hover {
       background-color: #0056b3;
     }
+
+    #showBookingsBtn {
+      background-color: #6c757d;
+      margin-top: 20px;
+    }
+
+    #showBookingsBtn:hover {
+      background-color: #495057;
+    }
+
     .bookings {
       margin-top: 30px;
     }
+
     .booking-entry {
-      background: #e9ecef;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 10px;
+      background: #f1f3f5;
+      padding: 15px;
+      border-left: 5px solid #007BFF;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
     }
-    #showBookingsBtn {
-      margin-top: 20px;
-      background-color: #6c757d;
-    }
-    #showBookingsBtn:hover {
-      background-color: #5a6268;
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      input, select, button {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Laundry Slot Booking</h2>
+    <h2>🧺 Laundry Slot Booking</h2>
     <form id="bookingForm">
       <label for="userName">Name:</label>
       <input type="text" id="userName" required />
@@ -93,17 +132,18 @@
         <option value="">-- Select Slot --</option>
       </select>
 
-      <button type="submit">Book Slot</button>
+      <button type="submit">✅ Book Slot</button>
     </form>
 
-    <button id="showBookingsBtn">Show Today's Bookings</button>
+    <button id="showBookingsBtn">📅 Show Today's Bookings</button>
 
     <div class="bookings" id="bookingSection" style="display: none;">
-      <h3>Today's Bookings</h3>
+      <h3>📌 Today's Bookings</h3>
       <div id="bookingList"></div>
     </div>
   </div>
 
+  <!-- JavaScript (Firebase + Booking Logic) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
@@ -136,7 +176,6 @@
     bookingDate.value = today;
 
     const timeSlots = [];
-    // changed interval to 60 minutes:
     for (let minutes = 0; minutes < 24 * 60; minutes += 60) {
       const startHour = Math.floor(minutes / 60);
       const startMin = minutes % 60;
