@@ -164,7 +164,7 @@
     const getLocalDate = (offset = 0) => {
   const now = new Date();
   now.setDate(now.getDate() + offset);
-  return now.toISOString().split('T')[0];  // returns "YYYY-MM-DD"
+  return now.toLocaleDateString('en-CA');
     };
 
     const today = getLocalDate(0);
