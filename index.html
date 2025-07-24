@@ -162,9 +162,9 @@
     const db = getDatabase(app);
 
     const getLocalDate = (offset = 0) => {
-      const now = new Date();
-      now.setDate(now.getDate() + offset);
-      return now.toLocaleDateString('en-CA');
+  const now = new Date();
+  now.setDate(now.getDate() + offset);
+  return now.toISOString().split('T')[0];  // returns "YYYY-MM-DD"
     };
 
     const today = getLocalDate(0);
