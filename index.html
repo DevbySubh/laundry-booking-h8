@@ -6,99 +6,58 @@
   <title>Laundry Slot Booking H-8</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       font-family: 'Poppins', sans-serif;
       background: linear-gradient(135deg, #f0f4ff, #e1ecff);
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
     }
-
     .container {
-      max-width: 700px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 700px; margin: 40px auto; background: #fff; padding: 30px;
+      border-radius: 15px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
-
-    h2, h3 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-top: 20px;
-      color: #2c3e50;
-      font-weight: 600;
-    }
-
+    h2, h3 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+    label { display: block; margin-top: 20px; color: #2c3e50; font-weight: 600; }
     input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      font-family: 'Poppins', sans-serif;
-      transition: 0.3s;
+      width: 100%; padding: 12px; margin-top: 8px;
+      border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;
+      font-family: 'Poppins', sans-serif; transition: 0.3s;
     }
-
-    input:focus, select:focus {
-      border-color: #007BFF;
-      outline: none;
-    }
-
+    input:focus, select:focus { border-color: #007BFF; outline: none; }
     button {
-      background-color: #007BFF;
-      color: white;
-      font-weight: 600;
-      border: none;
-      margin-top: 30px;
-      transition: background-color 0.3s ease;
+      background-color: #007BFF; color: white; font-weight: 600; border: none;
+      margin-top: 30px; transition: background-color 0.3s ease;
     }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #showBookingsBtn {
-      background-color: #6c757d;
-      margin-top: 20px;
-    }
-
-    #showBookingsBtn:hover {
-      background-color: #495057;
-    }
-
-    .bookings {
-      margin-top: 30px;
-    }
-
+    button:hover { background-color: #0056b3; }
+    #showBookingsBtn { background-color: #6c757d; margin-top: 20px; }
+    #showBookingsBtn:hover { background-color: #495057; }
+    .bookings { margin-top: 30px; }
     .booking-entry {
-      background: #f1f3f5;
-      padding: 15px;
-      border-left: 5px solid #007BFF;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      font-size: 0.95rem;
+      background: #f1f3f5; padding: 15px; border-left: 5px solid #007BFF;
+      border-radius: 8px; margin-bottom: 12px; font-size: 0.95rem;
     }
-
+    .current-slot {
+      background-color: #e6ffe6;
+      border-left: 5px solid green;
+      position: relative;
+    }
+    .current-slot::after {
+      content: "🟢 Live Now";
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: green;
+    }
+    #filterOptions {
+      display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    #filterOptions label { font-weight: normal; margin-top: 0; }
     @media (max-width: 768px) {
-      .container {
-        margin: 20px;
-        padding: 20px;
-      }
-
-      input, select, button {
-        font-size: 0.95rem;
-      }
+      .container { margin: 20px; padding: 20px; }
+      input, select, button { font-size: 0.95rem; }
+      #filterOptions { flex-direction: column; }
     }
   </style>
 </head>
@@ -138,12 +97,17 @@
     <button id="showBookingsBtn">📅 Show Today's Bookings</button>
 
     <div class="bookings" id="bookingSection" style="display: none;">
-      <h3>📌 Today's Bookings</h3>
+      <h3>📌 Bookings</h3>
+      <div id="filterOptions">
+        <label><input type="checkbox" value="bigWasher"> Big Washer</label>
+        <label><input type="checkbox" value="smallWasher"> Small Washer</label>
+        <label><input type="checkbox" value="bigDryer"> Big Dryer</label>
+        <label><input type="checkbox" value="smallDryer"> Small Dryer</label>
+      </div>
       <div id="bookingList"></div>
     </div>
   </div>
 
-  <!-- JavaScript (Firebase + Booking Logic) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
@@ -162,9 +126,9 @@
     const db = getDatabase(app);
 
     const getLocalDate = (offset = 0) => {
-  const now = new Date();
-  now.setDate(now.getDate() + offset);
-  return now.toLocaleDateString('en-CA');
+      const now = new Date();
+      now.setDate(now.getDate() + offset);
+      return now.toLocaleDateString('en-CA');
     };
 
     const today = getLocalDate(0);
@@ -182,7 +146,6 @@
       const endMinutes = (minutes + 60) % (24 * 60);
       const endHour = Math.floor(endMinutes / 60);
       const endMin = endMinutes % 60;
-
       const start = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
       const end = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
       timeSlots.push(`${start} - ${end}`);
@@ -204,18 +167,59 @@
       });
     };
 
+    const getMinutes = (slot) => {
+      if (!slot) return Infinity;
+      const [hours, mins] = slot.split(" - ")[0].split(":").map(Number);
+      return hours * 60 + mins;
+    };
+
+    const getCurrentSlot = () => {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      return timeSlots.find(slot => {
+        const [startStr, endStr] = slot.split(" - ");
+        const startMin = parseInt(startStr.split(":")[0]) * 60 + parseInt(startStr.split(":")[1]);
+        const endMin = parseInt(endStr.split(":")[0]) * 60 + parseInt(endStr.split(":")[1]);
+        if (endMin > startMin) {
+          return currentMinutes >= startMin && currentMinutes < endMin;
+        } else { // Handles midnight wrap
+          return currentMinutes >= startMin || currentMinutes < endMin;
+        }
+      });
+    };
+
     const loadBookings = async () => {
       const date = bookingDate.value;
+      const selectedTypes = Array.from(document.querySelectorAll("#filterOptions input:checked")).map(cb => cb.value);
       const snapshot = await get(child(ref(db), `bookings/${date}`));
       const booked = { bigWasher: [], smallWasher: [], bigDryer: [], smallDryer: [] };
       const bookingList = document.getElementById("bookingList");
       bookingList.innerHTML = "";
 
+      const currentSlot = getCurrentSlot();
+      const todayStr = today; // string in YYYY-MM-DD
+
       if (snapshot.exists()) {
         const data = snapshot.val();
-        Object.values(data).forEach(entry => {
+
+        const sortedEntries = Object.values(data).sort((a, b) => {
+          const earliestA = Math.min(getMinutes(a.bigWasher), getMinutes(a.smallWasher), getMinutes(a.bigDryer), getMinutes(a.smallDryer));
+          const earliestB = Math.min(getMinutes(b.bigWasher), getMinutes(b.smallWasher), getMinutes(b.bigDryer), getMinutes(b.smallDryer));
+          return earliestA - earliestB;
+        });
+
+        sortedEntries.forEach(entry => {
+          const matches = selectedTypes.length === 0 || selectedTypes.some(type => entry[type]);
+          if (!matches) return;
+
           const div = document.createElement("div");
           div.classList.add("booking-entry");
+
+          // Only highlight if it's today and in current slot
+          if (entry.date === todayStr && Object.values(entry).some(val => val === currentSlot)) {
+            div.classList.add("current-slot");
+          }
+
           div.innerText = `${entry.name} booked on ${entry.date}
 Big Washer: ${entry.bigWasher || "-"}
 Small Washer: ${entry.smallWasher || "-"}
@@ -232,7 +236,12 @@ Small Dryer: ${entry.smallDryer || "-"}`;
       populateSlots(booked);
     };
 
-    document.getElementById("bookingDate").addEventListener("change", loadBookings);
+    document.querySelectorAll("#filterOptions input").forEach(cb => {
+      cb.checked = false;
+      cb.addEventListener("change", loadBookings);
+    });
+
+    bookingDate.addEventListener("change", loadBookings);
 
     document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -242,26 +251,6 @@ Small Dryer: ${entry.smallDryer || "-"}`;
       const smallWasher = document.getElementById("smallWasher").value;
       const bigDryer = document.getElementById("bigDryer").value;
       const smallDryer = document.getElementById("smallDryer").value;
-
-      const washerCount = [bigWasher, smallWasher].filter(Boolean).length;
-      const dryerCount = [bigDryer, smallDryer].filter(Boolean).length;
-
-      if (washerCount > 1) {
-        alert("Please select only one Washing Machine slot (Big or Small).");
-        return;
-      }
-      if (dryerCount > 1) {
-        alert("Please select only one Dryer slot (Big or Small).");
-        return;
-      }
-      if (washerCount === 0) {
-        alert("Please select a time slot for at least one Washing Machine.");
-        return;
-      }
-      if (dryerCount === 0) {
-        alert("Please select a time slot for at least one Dryer.");
-        return;
-      }
 
       const bookingData = { name, date, bigWasher, smallWasher, bigDryer, smallDryer };
       await push(ref(db, `bookings/${date}`), bookingData);
