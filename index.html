@@ -112,6 +112,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
+    // 🔑 Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBfU-aqLYHF_X0Rwv0WqZtB_M0cdacoDg",
       authDomain: "launry-booking-h8.firebaseapp.com",
@@ -139,6 +140,7 @@
     bookingDate.max = tomorrow;
     bookingDate.value = today;
 
+    // Generate hourly time slots
     const timeSlots = [];
     for (let minutes = 0; minutes < 24 * 60; minutes += 60) {
       const startHour = Math.floor(minutes / 60);
@@ -182,7 +184,7 @@
         const endMin = parseInt(endStr.split(":")[0]) * 60 + parseInt(endStr.split(":")[1]);
         if (endMin > startMin) {
           return currentMinutes >= startMin && currentMinutes < endMin;
-        } else { // Handles midnight wrap
+        } else {
           return currentMinutes >= startMin || currentMinutes < endMin;
         }
       });
@@ -197,7 +199,7 @@
       bookingList.innerHTML = "";
 
       const currentSlot = getCurrentSlot();
-      const todayStr = today; // string in YYYY-MM-DD
+      const todayStr = today;
 
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -215,7 +217,6 @@
           const div = document.createElement("div");
           div.classList.add("booking-entry");
 
-          // Only highlight if it's today and in current slot
           if (entry.date === todayStr && Object.values(entry).some(val => val === currentSlot)) {
             div.classList.add("current-slot");
           }
@@ -243,6 +244,7 @@ Small Dryer: ${entry.smallDryer || "-"}`;
 
     bookingDate.addEventListener("change", loadBookings);
 
+    // ✅ Prevent double booking (server-side check)
     document.getElementById("bookingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("userName").value.trim();
@@ -253,8 +255,30 @@ Small Dryer: ${entry.smallDryer || "-"}`;
       const smallDryer = document.getElementById("smallDryer").value;
 
       const bookingData = { name, date, bigWasher, smallWasher, bigDryer, smallDryer };
+
+      // 🔍 Check for conflicts before saving
+      const snapshot = await get(child(ref(db), `bookings/${date}`));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const allBookings = Object.values(data);
+
+        for (let entry of allBookings) {
+          if (
+            (bigWasher && entry.bigWasher === bigWasher) ||
+            (smallWasher && entry.smallWasher === smallWasher) ||
+            (bigDryer && entry.bigDryer === bigDryer) ||
+            (smallDryer && entry.smallDryer === smallDryer)
+          ) {
+            alert("⚠️ Slot already booked! Please pick another one.");
+            return; // Stop booking
+          }
+        }
+      }
+
+      // ✅ If no conflict, save
       await push(ref(db, `bookings/${date}`), bookingData);
-      alert("Booking Successful!");
+
+      alert("✅ Booking Successful!");
       document.getElementById("bookingForm").reset();
       bookingDate.value = date;
       loadBookings();
