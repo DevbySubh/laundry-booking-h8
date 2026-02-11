@@ -266,7 +266,7 @@ Small Dryer: ${entry.smallDryer || "-"}`;
       const bigDryer = document.getElementById("bigDryer").value;
       const smallDryer = document.getElementById("smallDryer").value;
 
-      const bookingData = { name, date, bigWasher, smallWasher, bigDryer, smallDryer };
+      const bookingData = {uid: auth.currentUser.uid,name, date, bigWasher, smallWasher, bigDryer, smallDryer };
 
       // 🔍 Check for conflicts before saving
       const snapshot = await get(child(ref(db), `bookings/${date}`));
